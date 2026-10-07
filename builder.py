@@ -19,8 +19,8 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 
 # Register TrueType fonts
-pdfmetrics.registerFont(TTFont('DejaVuSans', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
-pdfmetrics.registerFont(TTFont('DejaVuSans-Bold', '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'))
+
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ASSETS_DIR = os.path.join(BASE_DIR, "assets")
@@ -93,7 +93,7 @@ class NumberedCanvasWithLogos(canvas.Canvas):
 
         # Running Footer
         self.line(36, 38, w - 36, 38)
-        self.setFont('DejaVuSans', 8)
+        self.setFont('Helvetica', 8)
         self.setFillColor(colors.HexColor('#64748B'))
         ctr_info = getattr(self, 'contract_info', 'Contract-Cadru Prestări Servicii Contabilitate')
         self.drawString(36, 26, ctr_info)
@@ -108,14 +108,14 @@ def generate_pdf_contract(prestator_key, client_data, nr_ctr, data_ctr, pret_baz
     styles = getSampleStyleSheet()
     
     # Carefully calibrated font sizes to fit 3 pages for main body + signatures
-    p_title = ParagraphStyle('CTitle', fontName='DejaVuSans-Bold', fontSize=12, leading=15, alignment=1, textColor=colors.HexColor('#1B365D'))
-    p_sub = ParagraphStyle('CSub', fontName='DejaVuSans', fontSize=8.5, leading=11.5, alignment=1, textColor=colors.HexColor('#475569'))
-    p_h1 = ParagraphStyle('CH1', fontName='DejaVuSans-Bold', fontSize=9.5, leading=12.5, textColor=colors.HexColor('#1B365D'), spaceBefore=5, spaceAfter=2.5, keepWithNext=True)
-    p_h2 = ParagraphStyle('CH2', fontName='DejaVuSans-Bold', fontSize=8.5, leading=11.5, textColor=colors.HexColor('#2B4C7E'), spaceBefore=4, spaceAfter=2, keepWithNext=True)
-    p_body = ParagraphStyle('CBody', fontName='DejaVuSans', fontSize=7.8, leading=10.2, textColor=colors.HexColor('#1E293B'), spaceBefore=1, spaceAfter=1.8, alignment=4)
-    p_crit = ParagraphStyle('CCrit', fontName='DejaVuSans-Bold', fontSize=7.8, leading=10.2, textColor=colors.HexColor('#991B1B'), spaceBefore=1.5, spaceAfter=2, alignment=4)
-    p_table = ParagraphStyle('CTable', fontName='DejaVuSans', fontSize=7.2, leading=9.2, textColor=colors.HexColor('#1E293B'))
-    p_table_h = ParagraphStyle('CTableH', fontName='DejaVuSans-Bold', fontSize=7.2, leading=9.2, textColor=colors.white, alignment=1)
+    p_title = ParagraphStyle('CTitle', fontName='Helvetica-Bold', fontSize=12, leading=15, alignment=1, textColor=colors.HexColor('#1B365D'))
+    p_sub = ParagraphStyle('CSub', fontName='Helvetica', fontSize=8.5, leading=11.5, alignment=1, textColor=colors.HexColor('#475569'))
+    p_h1 = ParagraphStyle('CH1', fontName='Helvetica-Bold', fontSize=9.5, leading=12.5, textColor=colors.HexColor('#1B365D'), spaceBefore=5, spaceAfter=2.5, keepWithNext=True)
+    p_h2 = ParagraphStyle('CH2', fontName='Helvetica-Bold', fontSize=8.5, leading=11.5, textColor=colors.HexColor('#2B4C7E'), spaceBefore=4, spaceAfter=2, keepWithNext=True)
+    p_body = ParagraphStyle('CBody', fontName='Helvetica', fontSize=7.8, leading=10.2, textColor=colors.HexColor('#1E293B'), spaceBefore=1, spaceAfter=1.8, alignment=4)
+    p_crit = ParagraphStyle('CCrit', fontName='Helvetica-Bold', fontSize=7.8, leading=10.2, textColor=colors.HexColor('#991B1B'), spaceBefore=1.5, spaceAfter=2, alignment=4)
+    p_table = ParagraphStyle('CTable', fontName='Helvetica', fontSize=7.2, leading=9.2, textColor=colors.HexColor('#1E293B'))
+    p_table_h = ParagraphStyle('CTableH', fontName='Helvetica-Bold', fontSize=7.2, leading=9.2, textColor=colors.white, alignment=1)
 
     story = []
 
