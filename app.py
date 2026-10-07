@@ -15,6 +15,9 @@ st.set_page_config(
 # Custom Styling
 st.markdown("""
 <style>
+    * {
+        font-family: 'Helvetica', 'Arial', sans-serif !important;
+    }
     .main-header {
         background: linear-gradient(135deg, #1B365D 0%, #2B4C7E 100%);
         padding: 22px 28px;
@@ -159,34 +162,58 @@ def fetch_anaf_company(cui_input):
     clean_cui = re.sub(r'\D', '', str(cui_input))
     if not clean_cui:
         return None, "Introduceți un CUI valid compus doar din cifre."
-    url = "https://api.anaf.ro/PlatitorTvaRest/api/v8/ws/tva"
+    
+    # Endpoint-uri oficiale ANAF (webservicesp este serviciul public deschis pentru interogări externe)
+    endpoints = [
+        "https://webservicesp.anaf.ro/PlatitorTvaRest/api/v8/ws/tva",
+        "https://api.anaf.ro/PlatitorTvaRest/api/v8/ws/tva"
+    ]
+    
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "Accept": "application/json, text/plain, */*",
+        "Content-Type": "application/json",
+        "Accept-Language": "ro-RO,ro;q=0.9,en-US;q=0.8,en;q=0.7",
+        "Origin": "https://www.anaf.ro",
+        "Referer": "https://www.anaf.ro/"
+    }
+    
     payload = [{"cui": int(clean_cui), "data": datetime.date.today().strftime("%Y-%m-%d")}]
-    try:
-        resp = requests.post(url, json=payload, timeout=8)
-        if resp.status_code == 200:
-            data = resp.json()
-            if "found" in data and len(data["found"]) > 0:
-                item = data["found"][0]
-                dg = item.get("date_generale", {})
-                adresa_str = dg.get("adresa") or item.get("adresa") or ""
-                nume_str = dg.get("denumire") or item.get("denumire") or ""
-                regcom_str = dg.get("nrRegCom") or item.get("nrRegCom") or ""
-                
-                riscuri, detalii, risc_text = analyze_anaf_risks(item)
+    
+    last_error = None
+    for url in endpoints:
+        try:
+            resp = requests.post(url, json=payload, headers=headers, timeout=12)
+            if resp.status_code == 200:
+                data = resp.json()
+                if "found" in data and len(data["found"]) > 0:
+                    item = data["found"][0]
+                    dg = item.get("date_generale", {})
+                    adresa_str = dg.get("adresa") or item.get("adresa") or ""
+                    nume_str = dg.get("denumire") or item.get("denumire") or ""
+                    regcom_str = dg.get("nrRegCom") or item.get("nrRegCom") or ""
+                    
+                    riscuri, detalii, risc_text = analyze_anaf_risks(item)
 
-                return {
-                    "nume": nume_str.strip(),
-                    "sediu": adresa_str.strip(),
-                    "reg_com": regcom_str.strip(),
-                    "cui": clean_cui,
-                    "riscuri": riscuri,
-                    "detalii": detalii,
-                    "risc_text": risc_text
-                }, None
-            return None, f"CUI-ul {clean_cui} nu a fost găsit în baza oficială ANAF."
-        return None, f"Serverul ANAF a răspuns cu codul HTTP {resp.status_code}."
-    except Exception as e:
-        return None, f"Eroare de conexiune la serverul ANAF ({str(e)}). Vă rugăm să completați manual datele."
+                    return {
+                        "nume": nume_str.strip(),
+                        "sediu": adresa_str.strip(),
+                        "reg_com": regcom_str.strip(),
+                        "cui": clean_cui,
+                        "riscuri": riscuri,
+                        "detalii": detalii,
+                        "risc_text": risc_text
+                    }, None
+                elif "notFound" in data and len(data.get("notFound", [])) > 0:
+                    return None, f"CUI-ul {clean_cui} nu a fost găsit în baza de date a Ministerului Finanțelor / ANAF."
+                return None, f"CUI-ul {clean_cui} nu a returnat date valide de la ANAF."
+            else:
+                last_error = f"Serverul ANAF ({url.split('/')[2]}) a răspuns cu codul HTTP {resp.status_code}."
+        except Exception as e:
+            last_error = f"Eroare de conexiune la serverul ANAF: {str(e)}"
+            continue
+            
+    return None, last_error or "Nu s-a putut realiza conexiunea cu serverul ANAF. Vă rugăm să completați manual datele."
 
 if "client_data" not in st.session_state:
     st.session_state["client_data"] = {

@@ -18,9 +18,41 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 
-# Register TrueType fonts
+from reportlab.pdfbase.pdfmetrics import registerFontFamily
 
+# Register Helvetica TrueType fonts with full Romanian diacritics support
+_assets_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets')
+_h_reg = os.path.join(_assets_dir, 'Helvetica.ttf')
+_h_bold = os.path.join(_assets_dir, 'Helvetica-Bold.ttf')
+_h_it = os.path.join(_assets_dir, 'Helvetica-Oblique.ttf')
+_h_bi = os.path.join(_assets_dir, 'Helvetica-BoldOblique.ttf')
 
+# Fallbacks if assets are not local
+if not os.path.exists(_h_reg):
+    for _p in ['/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf']:
+        if os.path.exists(_p): _h_reg = _p; break
+if not os.path.exists(_h_bold):
+    for _p in ['/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf', '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf']:
+        if os.path.exists(_p): _h_bold = _p; break
+if not os.path.exists(_h_it):
+    for _p in ['/usr/share/fonts/truetype/liberation/LiberationSans-Italic.ttf']:
+        if os.path.exists(_p): _h_it = _p; break
+if not os.path.exists(_h_bi):
+    for _p in ['/usr/share/fonts/truetype/liberation/LiberationSans-BoldItalic.ttf']:
+        if os.path.exists(_p): _h_bi = _p; break
+
+pdfmetrics.registerFont(TTFont('Helvetica', _h_reg))
+pdfmetrics.registerFont(TTFont('Helvetica-Bold', _h_bold))
+if os.path.exists(_h_it):
+    pdfmetrics.registerFont(TTFont('Helvetica-Oblique', _h_it))
+if os.path.exists(_h_bi):
+    pdfmetrics.registerFont(TTFont('Helvetica-BoldOblique', _h_bi))
+
+registerFontFamily('Helvetica', 
+                   normal='Helvetica', 
+                   bold='Helvetica-Bold', 
+                   italic='Helvetica-Oblique' if os.path.exists(_h_it) else 'Helvetica', 
+                   boldItalic='Helvetica-BoldOblique' if os.path.exists(_h_bi) else 'Helvetica-Bold')
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ASSETS_DIR = os.path.join(BASE_DIR, "assets")
@@ -438,6 +470,14 @@ def generate_docx_contract(prestator_key, client_data, nr_ctr, data_ctr, pret_ba
     data_start = data_start or data_ctr
 
     doc = Document()
+    # Set default style font to Helvetica
+    style_normal = doc.styles['Normal']
+    style_normal.font.name = 'Helvetica'
+    style_normal.font.size = Pt(9.5)
+    style_normal.font.color.rgb = RGBColor(30, 41, 59)
+    for h_name in ['Heading 1', 'Heading 2', 'Heading 3']:
+        if h_name in doc.styles:
+            doc.styles[h_name].font.name = 'Helvetica' 
     for s in doc.sections:
         s.top_margin = Inches(0.7)
         s.bottom_margin = Inches(0.7)
