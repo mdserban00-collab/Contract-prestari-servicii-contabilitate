@@ -187,8 +187,7 @@ Reg. Com.: {client_data.get('reg_com', 'J___/______/________')} &nbsp;|&nbsp; CU
 Cont IBAN: <b>{client_data.get('iban', 'RO____________________')}</b><br/>
 Banca: {client_data.get('banca', '____________________')}<br/>
 Reprezentant: <b>{client_data.get('reprezentant', '____________________')}</b> ({client_data.get('functie', 'Administrator')})<br/>
-E-mail: {client_data.get('email', '____________________')} &nbsp;|&nbsp; Tel: {client_data.get('telefon', '__________')}<br/>
-<b>Rubrica Risc:</b> <font color="{'#B91C1C' if 'ATENȚIE' in client_data.get('risc', '') or 'INACTIV' in client_data.get('risc', '').upper() or 'INSOLVENT' in client_data.get('risc', '').upper() or 'ANULAT' in client_data.get('risc', '').upper() else '#1E3A8A'}">{client_data.get('risc', 'Activă fiscal conform ANAF, fără proceduri de insolvență/lichidare sau cod TVA anulat.')}</font>"""
+E-mail: {client_data.get('email', '____________________')} &nbsp;|&nbsp; Tel: {client_data.get('telefon', '__________')}"""
     tbl_parti = Table([[Paragraph(t_prest, p_table), Paragraph(t_benef, p_table)]], colWidths=[col_w, col_w])
     tbl_parti.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (0,0), colors.HexColor('#F1F5F9')),
@@ -571,7 +570,7 @@ def generate_docx_contract(prestator_key, client_data, nr_ctr, data_ctr, pret_ba
         f"IBAN: {client_data.get('iban', 'RO____________________')}\n"
         f"Banca: {client_data.get('banca', '____________________')}\n"
         f"Reprezentant: {client_data.get('reprezentant', '____________________')} ({client_data.get('functie', 'Administrator')})\n"
-        f"E-mail: {client_data.get('email', '____________________')} | Tel: {client_data.get('telefon', '__________')}\n" + f"Rubrica Risc: {client_data.get('risc', 'Activă fiscal conform ANAF, fără proceduri de insolvență/lichidare sau cod TVA anulat.')}"
+        f"E-mail: {client_data.get('email', '____________________')} | Tel: {client_data.get('telefon', '__________')}"
     )
 
     def add_a(num, titlu, text, bold_red=False):
